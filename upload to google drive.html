@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Sample script for uploading multiple files to Google Drive without authorization</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.js"></script>
+</head>
+
+<body>
+    <form action="
+
+https://script.google.com/macros/s/AKfycbzk5_Qeol9WjB9wswf_s4rw8cPSlFBMpvQgQzH8DmCgazM-Qtnue1zKR9sTpdRHHRq6/exec" id="form" method="post">
+        Upload files
+        <div id="data"></div>
+        <input name="file" id="uploadfile" type="file" multiple>
+        <input id="submit" type="submit">
+    </form>
+    <script>
+    $('#uploadfile').on("change", function() {
+        var files = this.files;
+        var filesData = [];
+        
+        var processFile = function(file, callback) {
+            var fr = new FileReader();
+            fr.fileName = file.name;
+            fr.onload = function(e) {
+                var fileData = {
+                    data: e.target.result.replace(/^.*,/, ''),
+                    mimetype: e.target.result.match(/^.*(?=;)/)[0],
+                    filename: e.target.fileName
+                };
+                callback(fileData);
+            }
+            fr.readAsDataURL(file);
+        };
+        
+        var fileCount = files.length;
+        var processedCount = 0;
+
+        for (var i = 0; i < files.length; i++) {
+            processFile(files[i], function(fileData) {
+                filesData.push(fileData);
+                processedCount++;
+                if (processedCount === fileCount) {
+                    var jsonData = JSON.stringify(filesData);
+                    var html = '<input type="hidden" name="filesData" value=\'' + jsonData + '\' >';
+                    $("#data").empty().append(html);
+                }
+            });
+        }
+    });
+    </script>
+</body>
+
+</html>
