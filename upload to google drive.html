@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Multiple Files to Google Drive with Progress</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.js"></script>
+    <style>
+        .progress {
+            width: 100%;
+            background-color: #f3f3f3;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: #4caf50;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <form id="form" method="post" enctype="multipart/form-data">
+        Upload files
+        <div id="data"></div>
+        <input name="file" id="uploadfile" type="file" multiple>
+        <button type="button" id="submit">Submit</button>
+        <div id="progress-container"></div>
+    </form>
+    <script>
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB limit per file
+
+    $('#submit').on("click", function() {
+        var files = $('#uploadfile')[0].files;
+        var folderId = '121ZO0JaZNcZ7_kOKTvBVs8hxSnnIoGnTHtjZU3_wod0jlkMLPYKpVEoH3QwrTpBhNHtn_vLK'; // Replace with your folder ID
+
+        let uploadFile = (file, index, totalFiles) => {
+            if (file.size > MAX_FILE_SIZE) {
+                alert(`File ${file.name} is too large. Maximum allowed size is ${MAX_FILE_SIZE / 1024 / 1024} MB.`);
+                return;
+            }
+
+            var fr = new FileReader();
+            fr.fileName = file.name;
+            fr.onload = function(e) {
+                var fileData = {
+                    data: e.target.result.replace(/^.*,/, ''),
+                    mimetype: e.target.result.match(/^.*(?=;)/)[0],
+                    filename: e.target.fileName,
+                    folderId: folderId
+                };
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "https://script.google.com/macros/s/AKfycbzk5_Qeol9WjB9wswf_s4rw8cPSlFBMpvQgQzH8DmCgazM-Qtnue1zKR9sTpdRHHRq6/exec", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = (evt.loaded / evt.total) * 100;
+                        progressBar.style.width = percentComplete + '%';
+                        progressBar.innerHTML = percentComplete.toFixed(0) + '%';
+                    }
+                }, false);
+
+                xhr.addEventListener("load", function(evt) {
+                    if (xhr.status == 200) {
+                        progressBar.style.backgroundColor = '#4caf50';
+                        progressBar.innerHTML = 'Upload complete';
+                    } else {
+                        progressBar.style.backgroundColor = '#f44336';
+                        progressBar.innerHTML = 'Upload failed';
+                    }
+                    if (index + 1 < totalFiles) {
+                        uploadFile(files[index + 1], index + 1, totalFiles);
+                    }
+                }, false);
+
+                xhr.addEventListener("error", function(evt) {
+                    progressBar.style.backgroundColor = '#f44336';
+                    progressBar.innerHTML = 'Upload failed';
+                    if (index + 1 < totalFiles) {
+                        uploadFile(files[index + 1], index + 1, totalFiles);
+                    }
+                }, false);
+
+                var progressContainer = document.getElementById('progress-container');
+                var progressDiv = document.createElement('div');
+                progressDiv.className = 'progress';
+                var progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                progressDiv.appendChild(progressBar);
+                progressContainer.appendChild(progressDiv);
+
+                xhr.send($.param(fileData));
+            };
+            fr.readAsDataURL(file);
+        };
+
+        if (files.length > 0) {
+            uploadFile(files[0], 0, files.length);
+        }
+    });
+    </script>
+</body>
+</html>
