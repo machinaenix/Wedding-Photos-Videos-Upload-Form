@@ -21,6 +21,8 @@
         var files = $('#uploadfile')[0].files;
         var folderId = '121ZO0JaZNcZ7_kOKTvBVs8hxSnnIoGnTHtjZU3_wod0jlkMLPYKpVEoH3QwrTpBhNHtn_vLK'; // Replace with your folder ID
 
+        var uploadCount = 0; // To count successful uploads
+
         for (var i = 0; i < files.length; i++) {
             let file = files[i];
 
@@ -39,32 +41,21 @@
                     folderId: folderId
                 };
 
-                // Display progress bar for the file
-                var progressBar = $('<div class="progress"><div class="progress-bar"></div></div>');
-                $('#data').append(progressBar);
-
                 $.ajax({
                     url: "https://script.google.com/macros/s/AKfycbzk5_Qeol9WjB9wswf_s4rw8cPSlFBMpvQgQzH8DmCgazM-Qtnue1zKR9sTpdRHHRq6/exec",
                     type: "POST",
                     data: fileData,
-                    xhr: function() {
-                        var xhr = new window.XMLHttpRequest();
-                        xhr.upload.addEventListener("progress", function(evt) {
-                            if (evt.lengthComputable) {
-                                var percentComplete = evt.loaded / evt.total * 100;
-                                progressBar.find('.progress-bar').width(percentComplete + '%').html(percentComplete.toFixed(0) + '%');
-                            }
-                        }, false);
-                        return xhr;
-                    },
                     success: function(response) {
                         console.log(response);
-                        // Remove progress bar on success
-                        progressBar.remove();
+                        uploadCount++;
+                        // Check if all files have been uploaded successfully
+                        if (uploadCount === files.length) {
+                            // Reload the page
+                            location.reload();
+                        }
                     },
                     error: function(response) {
                         console.error(response);
-                        // Optionally handle error
                     }
                 });
             };
