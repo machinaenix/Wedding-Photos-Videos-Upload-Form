@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Drive Gallery</title>
+  <style>
+    .gallery img {
+      width: 150px;
+      margin: 10px;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    const API_KEY = 'AIzaSyDwJ07hQ3h6GTFQNo1DLKLnlu-jc20cluE';
+    const FOLDER_ID = '121ZO0JaZNcZ7_kOKTvBVs8hxSnnIoGnTHtjZU3_wod0jlkMLPYKpVEoH3QwrTpBhNHtn_vLK';
+
+    $(document).ready(function () {
+      $.get(`https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents&key=${API_KEY}`, function (data) {
+        data.files.forEach(file => {
+          if (file.mimeType.startsWith('image/')) {
+            const imgURL = `https://drive.google.com/uc?export=view&id=${file.id}`;
+            $('#gallery').append(`<img src="${imgURL}" alt="${file.name}" />`);
+          }
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="gallery" class="gallery"></div>
+</body>
+</html>
