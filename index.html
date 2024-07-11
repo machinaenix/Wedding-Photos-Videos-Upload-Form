@@ -35,6 +35,7 @@
 </head>
 <body>
     <h1>After hitting upload click the below link:</h1>
+    <a href="https://drive.google.com/drive/folders/121ZO0JaZNcZ7_kOKTvBVs8hxSnnIoGnTHtjZU3_wod0jlkMLPYKpVEoH3QwrTpBhNHtn_vLK?usp=drive_link" target="_blank">Go to Google Drive Folder</a>
     <div id="content"></div>
 
     <script src="https://apis.google.com/js/api.js"></script>
@@ -59,7 +60,7 @@
 
         function listFiles() {
             gapi.client.drive.files.list({
-                'q': '${FOLDER_ID}' in parents,
+                'q': `'${FOLDER_ID}' in parents`,
                 'pageSize': 10,
                 'fields': "nextPageToken, files(id, name, mimeType, thumbnailLink, webViewLink)"
             }).then(function(response) {
@@ -70,12 +71,12 @@
                     files.forEach(file => {
                         const fileItem = document.createElement('div');
                         fileItem.className = 'file-item';
-                        fileItem.innerHTML = 
+                        fileItem.innerHTML = `
                             <a href="${file.webViewLink}" target="_blank">
                                 <img src="${file.thumbnailLink || 'https://via.placeholder.com/150'}" alt="${file.name}">
                                 <p>${file.name}</p>
                             </a>
-                        ;
+                        `;
                         content.appendChild(fileItem);
                     });
                 } else {
@@ -89,4 +90,4 @@
         loadDriveApi();
     </script>
 </body>
-</html> 
+</html>
